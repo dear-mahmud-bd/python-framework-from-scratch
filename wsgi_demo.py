@@ -16,12 +16,14 @@ class MiddlewareReverse:
 
 
 def application(environ, start_response):
-    # Extract and format environment variables
-    response_body = [
-        f'{key}: {value}' for key, value in sorted(environ.items())
-    ]
-    response_body = '\n'.join(response_body)
+    # # Extract and format environment variables
+    # response_body = [
+    #     f'{key}: {value}' for key, value in sorted(environ.items())
+    # ]
+    # response_body = '\n'.join(response_body)
     
+    response_body = f"Path: {environ['PATH_INFO']}"
+
     # Set response status and headers
     status = '200 OK'
     response_headers = [
@@ -43,3 +45,5 @@ server = make_server(
 )
 print(f"Serving on http://localhost:{PORT}")
 server.serve_forever()
+
+# waitress-serve --listen=127.0.0.1:8082 app:app
