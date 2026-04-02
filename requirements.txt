@@ -1,0 +1,10 @@
+gunicorn==25.0.1 # not working for my laptop
+waitress==3.0.2
+webob==1.8.9
+parse==1.21.1
+pytest==9.0.2
+requests==2.33.1
+requests-wsgi-adapter==0.4.1
+
+
+# pip install -r requirements.txt
