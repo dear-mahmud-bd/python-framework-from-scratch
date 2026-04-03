@@ -46,5 +46,5 @@ server = make_server(
 print(f"Serving on http://localhost:{PORT}")
 server.serve_forever()
 
-# waitress-serve --listen=127.0.0.1:8082 app:app
+# waitress-serve --listen=127.0.0.1:8082 app:app -> http://127.0.0.1:8082
 # gunicorn app:app

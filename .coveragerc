@@ -1,0 +1,13 @@
+[run]
+omit = 
+    __pycache__/*
+    .pytest_cache/*
+    htmlcov/*
+    venv/*
+    .gitignore
+    app.py
+    conftest.py
+    requirements.txt
+    test_dearmahmud.py
+    wsgi_demo.py
+

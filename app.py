@@ -26,25 +26,26 @@ def hello(request, response, name):
 def home2(request, response):
     response.text = "Hello from the SECOND HOME page"
 
+
 # Django-style class-based views 
 @app.route_create("/books")
 class BooksResource:
-    def get(self, req, resp):
-        resp.text = "List all books"
+    def get(self, request, response):
+        response.text = "List all books"
     
-    def post(self, req, resp):
-        resp.text = "Create a new book"
+    def post(self, request, response):
+        response.text = "Create a new book"
 
 @app.route_create("/users/{id:d}")
 class UserResource:
-    def get(self, req, resp, id):
-        resp.text = f"Get user {id}"
+    def get(self, request, response, id):
+        response.text = f"Get user {id}"
     
-    def put(self, req, resp, id):
-        resp.text = f"Update user {id}"
+    def put(self, request, response, id):
+        response.text = f"Update user {id}"
     
-    def delete(self, req, resp, id):
-        resp.text = f"Delete user {id}"
+    def delete(self, request, response, id):
+        response.text = f"Delete user {id}"
 
 
 # To run the server, and verify the routes, you can use the following curl commands:
