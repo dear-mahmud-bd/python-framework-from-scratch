@@ -1,13 +1,19 @@
 
+import os
 import inspect
 from parse import parse
 from webob import Request, Response
 from requests import Session as RequestsSession
+from jinja2 import Environment, FileSystemLoader
 from wsgiadapter import WSGIAdapter as RequestsWSGIAdapter
 
 class API:
-    def __init__(self):
+    def __init__(self, templates_dir="templates"):
         self.routes = {}
+        # Initialize Jinja2 environment
+        self.templates_env = Environment(
+            loader=FileSystemLoader(os.path.abspath(templates_dir))
+        )
 
     def __call__(self, environ, start_response):
         # 1 - WSGI compliant,
@@ -107,4 +113,9 @@ class API:
         session.mount(prefix=base_url, adapter=RequestsWSGIAdapter(self))
         return session
 
+    def template(self, template_name, context=None):
+        if context is None:
+            context = {}
+        
+        return self.templates_env.get_template(template_name).render(**context)
 

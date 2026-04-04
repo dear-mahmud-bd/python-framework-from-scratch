@@ -58,6 +58,17 @@ def books_handler(req, resp):
 app.add_route("/django-books", books_handler)
 
 
+# Initialize with template directory
+app = API(templates_dir="templates")
+
+# Use in handlers
+@app.route("/template")
+def template_handler(req, resp):
+    resp.body = app.template("index.html", context={
+        "name": "dearmahmud",
+        "title": "Mahmud's Framework"
+    }).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
+
 # To run the server, and verify the routes, you can use the following curl commands:
 """
 dearm@Mahmud-LAPTOP MINGW64 /p/Projects/Python_3.0_Po/M_020-Build-Framework/My_Framework (main)

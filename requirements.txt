@@ -6,6 +6,6 @@ pytest==9.0.2
 requests==2.33.1
 requests-wsgi-adapter==0.4.1
 pytest-cov==7.1.0 # test coverage report and quality matrics
-
+Jinja2==3.1.6 # for template (engine) rendering
 
 # pip install -r requirements.txt
