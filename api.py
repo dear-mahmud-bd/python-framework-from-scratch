@@ -38,6 +38,16 @@ class API:
             return handler
         return wrapper
     
+    # Django-style class-based views
+    def add_route(self, path, handler):
+        assert path not in self.routes, "Such route already exists."
+        self.routes[path] = handler
+    def route(self, path):
+        def wrapper(handler):
+            self.add_route(path, handler)  # Reuse add_route logic
+            return handler
+        return wrapper
+
     def default_response(self, response):
         response.status_code = 404
         response.text = "Request Not found"

@@ -1,4 +1,5 @@
 
+# Unit Testing 
 import pytest
 
 # from api import API
@@ -85,6 +86,18 @@ def test_class_based_handler_not_allowed_method(api, client):
     # This should raise AttributeError (method not implemented)
     with pytest.raises(AttributeError):
         client.get("http://127.0.0.1:8082/books")
+
+
+def test_alternative_route(api, client):
+    response_text = "Alternative way to add a route"
+
+    def home(req, resp):
+        resp.text = response_text
+
+    api.add_route("/alternative", home)
+
+    assert client.get("http://127.0.0.1:8082/alternative").text == response_text
+
 
 # pytest test_dearmahmud.py
 # pytest --cov=. test_dearmahmud.py

@@ -47,6 +47,16 @@ class UserResource:
     def delete(self, request, response, id):
         response.text = f"Delete user {id}"
 
+# New Django-style route
+def sample_handler(req, resp):
+    resp.text = "Django-style route example"
+app.add_route("/sample", sample_handler)
+
+def books_handler(req, resp):
+    resp.text = "All books from Django-style route"
+
+app.add_route("/django-books", books_handler)
+
 
 # To run the server, and verify the routes, you can use the following curl commands:
 """
