@@ -1,5 +1,5 @@
 gunicorn==25.0.1 # not working for my laptop
-waitress==3.0.2
+waitress==3.0.2 # production WSGI server for Windows
 webob==1.8.9
 parse==1.21.1
 pytest==9.0.2
@@ -7,5 +7,9 @@ requests==2.33.1
 requests-wsgi-adapter==0.4.1
 pytest-cov==7.1.0 # test coverage report and quality matrics
 Jinja2==3.1.6 # for template (engine) rendering
+whitenoise==6.12.0 # for serving static files in production
+
+
+
 
 # pip install -r requirements.txt

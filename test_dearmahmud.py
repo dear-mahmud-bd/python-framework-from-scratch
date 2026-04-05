@@ -1,6 +1,7 @@
 
 # Unit Testing 
 import pytest
+from api import API
 
 # from api import API
 
@@ -129,10 +130,42 @@ def test_custom_exception_handler(api, client):
     assert response.text == "AttributeErrorHappened"
 
 
+def test_404_is_returned_for_nonexistent_static_file(tmpdir_factory):
+    empty_static_dir = tmpdir_factory.mktemp("empty_static")
+    api = API(static_dir=str(empty_static_dir))
+    client = api.test_session()
+    assert client.get("http://127.0.0.1:8082/main.css").status_code == 404
+
+
+FILE_DIR = "static"
+FILE_NAME = "main.css"
+FILE_CONTENTS = "body {background-color: red}"
+
+def _create_static(static_dir):
+    asset = static_dir.mkdir("static").join(FILE_NAME)
+    asset.write(FILE_CONTENTS)
+    return asset
+
+def test_assets_are_served(tmpdir_factory):
+    static_dir = tmpdir_factory.mktemp("static")
+    _create_static(static_dir)
+    api = API(static_dir=str(static_dir))
+    client = api.test_session()
+
+    response = client.get(f"http://127.0.0.1:8082/{FILE_DIR}/{FILE_NAME}")
+
+    assert response.status_code == 200
+    assert response.text == FILE_CONTENTS
+
+
+
 # pytest test_dearmahmud.py
 # pytest test_dearmahmud.py::test_template
 # pytest test_dearmahmud.py::test_custom_exception_handler
 # pytest --cov=. test_dearmahmud.py
 # pytest --cov=. --cov-report=html test_dearmahmud.py
+# pytest test_dearmahmud.py::test_assets_are_served
+# pytest test_dearmahmud.py::test_404_is_returned_for_nonexistent_static_file
+
 
 
