@@ -114,8 +114,24 @@ def test_template(api, client):
     assert "Some Name" in response.text
 
 
+def test_custom_exception_handler(api, client):
+    def on_exception(req, resp, exc):
+        resp.text = "AttributeErrorHappened"
+
+    api.add_exception_handler(on_exception)
+
+    @api.route("/")
+    def index(req, resp):
+        raise AttributeError()
+
+    response = client.get("http://127.0.0.1:8082/")
+
+    assert response.text == "AttributeErrorHappened"
+
+
 # pytest test_dearmahmud.py
 # pytest test_dearmahmud.py::test_template
+# pytest test_dearmahmud.py::test_custom_exception_handler
 # pytest --cov=. test_dearmahmud.py
 # pytest --cov=. --cov-report=html test_dearmahmud.py
 

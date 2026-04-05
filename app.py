@@ -1,6 +1,8 @@
 
 from api import API
 
+# Method -1 :
+"""
 # 1 - WSGI compliant
 # def app(environ, start_response):
 #     response_body = b"Hello, World!"
@@ -32,7 +34,6 @@ def home2(request, response):
 class BooksResource:
     def get(self, request, response):
         response.text = "List all books"
-    
     def post(self, request, response):
         response.text = "Create a new book"
 
@@ -40,10 +41,8 @@ class BooksResource:
 class UserResource:
     def get(self, request, response, id):
         response.text = f"Get user {id}"
-    
     def put(self, request, response, id):
         response.text = f"Update user {id}"
-    
     def delete(self, request, response, id):
         response.text = f"Delete user {id}"
 
@@ -54,8 +53,17 @@ app.add_route("/sample", sample_handler)
 
 def books_handler(req, resp):
     resp.text = "All books from Django-style route"
-
 app.add_route("/django-books", books_handler)
+
+# def custom_exception_handler(request, response, exception):
+#     response.text = "Oops! Something went wrong. Please contact support."
+# app.add_exception_handler(custom_exception_handler)
+
+# @app.route("/error") 
+# def buggy_handler(req, resp):
+#     raise ValueError("Something went wrong!")
+# Result: Friendly error message shown to users
+"""
 
 
 # Initialize with template directory
@@ -68,6 +76,17 @@ def template_handler(req, resp):
         "name": "dearmahmud",
         "title": "Mahmud's Framework"
     }).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
+
+
+def custom_exception_handler(request, response, exception_cls):
+    response.text = f"Error occurred: {str(exception_cls)}"
+app.add_exception_handler(custom_exception_handler)
+
+@app.route("/exception")
+def exception_throwing_handler(request, response):
+    raise AssertionError("This handler should not be used.")
+
+
 
 # To run the server, and verify the routes, you can use the following curl commands:
 """

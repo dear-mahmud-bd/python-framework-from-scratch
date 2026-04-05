@@ -14,6 +14,7 @@ class API:
         self.templates_env = Environment(
             loader=FileSystemLoader(os.path.abspath(templates_dir))
         )
+        self.exception_handler = None  
 
     def __call__(self, environ, start_response):
         # 1 - WSGI compliant,
@@ -32,6 +33,9 @@ class API:
         request = Request(environ)
         response = self.handle_request(request)
         return response(environ, start_response)
+
+    def add_exception_handler(self, exception_handler):
+        self.exception_handler = exception_handler
 
     def route_create(self, path):
         # # Check for duplicate routes
@@ -87,25 +91,47 @@ class API:
         # self.default_response(response)
         # return response
 
-        # 3 - for better maintainability
-        # handler = self.find_handler(request_path=request.path)
+        # # 3 - for better maintainability
+        # # handler = self.find_handler(request_path=request.path)
+        # response = Response()
+        # handler, kwargs = self.find_handler(request_path=request.path)
+        # if handler:
+        #     # handler(request, response)
+        #     if inspect.isclass(handler):
+        #         # # Get the appropriate method from the class
+        #         # handler_instance = handler()  # Create instance
+        #         # method_name = request.method.lower()  # 'GET' -> 'get'
+        #         # handler_function = getattr(handler_instance, method_name, None)
+        #         handler = getattr(handler(), request.method.lower(), None)
+        #         if handler is None:
+        #             raise AttributeError("Method not allowed", request.method)
+        #         handler(request, response, **kwargs)
+        #     else:
+        #         handler(request, response, **kwargs)
+        # else:
+        #     self.default_response(response)
+        # return response
+
+
+        # 4. Handle exceptions with a custom handler
         response = Response()
         handler, kwargs = self.find_handler(request_path=request.path)
-        if handler:
-            # handler(request, response)
-            if inspect.isclass(handler):
-                # # Get the appropriate method from the class
-                # handler_instance = handler()  # Create instance
-                # method_name = request.method.lower()  # 'GET' -> 'get'
-                # handler_function = getattr(handler_instance, method_name, None)
-                handler = getattr(handler(), request.method.lower(), None)
-                if handler is None:
-                    raise AttributeError("Method not allowed", request.method)
+        
+        try:
+            if handler is not None:
+                if inspect.isclass(handler):
+                    handler = getattr(handler(), request.method.lower(), None)
+                    if handler is None:
+                        raise AttributeError("Method not allowed", request.method)
                 handler(request, response, **kwargs)
             else:
-                handler(request, response, **kwargs)
-        else:
-            self.default_response(response)
+                self.default_response(response)
+        except Exception as e:
+            if self.exception_handler is None:
+                raise e  # Re-raise if no custom handler
+            else:
+                self.exception_handler(request, response, e)
+        
         return response
 
     def test_session(self, base_url="http://127.0.0.1:8082"):
