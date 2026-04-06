@@ -3,6 +3,7 @@ import os
 import inspect
 from parse import parse
 from whitenoise import WhiteNoise
+from middleware import Middleware
 from webob import Request, Response
 from requests import Session as RequestsSession
 from jinja2 import Environment, FileSystemLoader
@@ -18,6 +19,7 @@ class API:
         self.exception_handler = None
         # Initialize WhiteNoise for static file serving
         self.whitenoise = WhiteNoise(self.wsgi_app, root=static_dir)
+        self.middleware = Middleware(self)  # middleware instance
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
@@ -42,8 +44,20 @@ class API:
         # response = self.handle_request(request)
         # return response(environ, start_response)
 
-        return self.whitenoise(environ, start_response)
+        # 4 - Serve static files with WhiteNoise
+        # return self.whitenoise(environ, start_response)
+        
+        path_info = environ["PATH_INFO"]
+
+        if path_info.startswith("/static"):
+            environ["PATH_INFO"] = path_info[len("/static"):]
+            return self.whitenoise(environ, start_response)
+        # Use middleware instead of direct handling
+        return self.middleware(environ, start_response)  
+
     
+    def add_middleware(self, middleware_cls):
+        self.middleware.add(middleware_cls)
 
     def add_exception_handler(self, exception_handler):
         self.exception_handler = exception_handler

@@ -1,8 +1,10 @@
 
+import time
 from api import API
+from middleware import Middleware
 
 # Method -1 :
-"""
+
 # 1 - WSGI compliant
 # def app(environ, start_response):
 #     response_body = b"Hello, World!"
@@ -55,6 +57,25 @@ def books_handler(req, resp):
     resp.text = "All books from Django-style route"
 app.add_route("/django-books", books_handler)
 
+# Use Middleware for request/response processing
+class SimpleCustomMiddleware(Middleware):
+    def process_request(self, req):
+        print("Processing request", req.url)
+
+    def process_response(self, req, resp):
+        print("Processing response", req.url)
+app.add_middleware(SimpleCustomMiddleware)
+
+class RequestTimingMiddleware(Middleware):
+    def process_request(self, req):
+        req.start_time = time.time()
+    
+    def process_response(self, req, resp):
+        if hasattr(req, 'start_time'):
+            duration = time.time() - req.start_time
+            resp.headers['X-Response-Time'] = f"{duration:.4f}s"
+app.add_middleware(RequestTimingMiddleware)
+
 # def custom_exception_handler(request, response, exception):
 #     response.text = "Oops! Something went wrong. Please contact support."
 # app.add_exception_handler(custom_exception_handler)
@@ -63,10 +84,11 @@ app.add_route("/django-books", books_handler)
 # def buggy_handler(req, resp):
 #     raise ValueError("Something went wrong!")
 # Result: Friendly error message shown to users
-"""
 
 
+# Method -2: Use Middleware for request processing and exception handling
 # Initialize with template directory
+"""
 app = API(templates_dir="templates")
 
 # Use in handlers
@@ -85,7 +107,7 @@ app.add_exception_handler(custom_exception_handler)
 @app.route("/exception")
 def exception_throwing_handler(request, response):
     raise AssertionError("This handler should not be used.")
-
+"""
 
 
 # To run the server, and verify the routes, you can use the following curl commands:
@@ -115,7 +137,7 @@ $
 
 
 And the server logs show the following error:
-  File "P:\Projects\Python_3.0_Po\M_020-Build-Framework\My_Framework\api.py", line 86, in handle_request
+  File "P:/Projects/Python_3.0_Po/M_020-Build-Framework/My_Framework/api.py", line 86, in handle_request
     raise AttributeError("Method not allowed", request.method)
 AttributeError: ('Method not allowed', 'PATCH')
 """
