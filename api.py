@@ -62,24 +62,27 @@ class API:
     def add_exception_handler(self, exception_handler):
         self.exception_handler = exception_handler
 
-    def route_create(self, path):
+    def route_create(self, path, allowed_methods=None):
         # # Check for duplicate routes
         # if path in self.routes:
         #     raise AssertionError("Such route already exists.")
-        assert path not in self.routes, "Such route already exists."
-
         def wrapper(handler):
-            self.routes[path] = handler
+            self.add_route(path, handler, allowed_methods)  # Reuse add_route logic
             return handler
         return wrapper
     
     # Django-style class-based views
-    def add_route(self, path, handler):
+    # api.py - Update the add_route method
+    def add_route(self, path, handler, allowed_methods=None):
         assert path not in self.routes, "Such route already exists."
-        self.routes[path] = handler
-    def route(self, path):
+        if allowed_methods is None:
+            allowed_methods = ["get", "post", "put", "patch", "delete", "options"]
+        self.routes[path] = {"handler": handler, "allowed_methods": [method.lower() for method in allowed_methods]}
+
+
+    def route(self, path, allowed_methods=None):
         def wrapper(handler):
-            self.add_route(path, handler)  # Reuse add_route logic
+            self.add_route(path, handler, allowed_methods) # Reuse add_route logic
             return handler
         return wrapper
 
@@ -87,18 +90,26 @@ class API:
         response.status_code = 404
         response.text = "Request Not found"
 
-    def find_handler(self, request_path):
-        # 1 - simple path matching
-        # for path, handler in self.routes.items():
-        #     if path == request_path:
-        #         return handler
+    # def find_handler(self, request_path):
+    #     # 1 - simple path matching
+    #     # for path, handler in self.routes.items():
+    #     #     if path == request_path:
+    #     #         return handler
 
-        # 2 - path matching with parameters
-        for path, handler in self.routes.items():
+    #     # 2 - path matching with parameters
+    #     # for path, handler in self.routes.items():
+    #     #     parse_result = parse(path, request_path)
+    #     #     if parse_result is not None:
+    #     #         return handler, parse_result.named
+    #     # return None, None
+    
+    def find_handler(self, request_path):
+        for path, handler_data in self.routes.items():
             parse_result = parse(path, request_path)
             if parse_result is not None:
-                return handler, parse_result.named
+                return handler_data, parse_result.named
         return None, None
+
 
     def handle_request(self, request):
         # 1 - WSGI compliant
@@ -139,25 +150,56 @@ class API:
 
 
         # 4. Handle exceptions with a custom handler
+        # response = Response()
+        # handler, kwargs = self.find_handler(request_path=request.path)
+        
+        # try:
+        #     if handler is not None:
+        #         if inspect.isclass(handler):
+        #             handler = getattr(handler(), request.method.lower(), None)
+        #             if handler is None:
+        #                 raise AttributeError("Method not allowed", request.method)
+        #         handler(request, response, **kwargs)
+        #     else:
+        #         self.default_response(response)
+        # except Exception as e:
+        #     if self.exception_handler is None:
+        #         raise e  # Re-raise if no custom handler
+        #     else:
+        #         self.exception_handler(request, response, e)
+        # return response
+
+
+        # 5. Use middleware for request/response processing and exception handling
         response = Response()
-        handler, kwargs = self.find_handler(request_path=request.path)
+        handler_data, kwargs = self.find_handler(request_path=request.path)
         
         try:
-            if handler is not None:
+            if handler_data is not None:
+                handler = handler_data["handler"]
+                allowed_methods = handler_data["allowed_methods"]
+                
                 if inspect.isclass(handler):
+                    # Class-based handler - existing logic
                     handler = getattr(handler(), request.method.lower(), None)
                     if handler is None:
                         raise AttributeError("Method not allowed", request.method)
+                else:
+                    # Function-based handler - new method validation
+                    if request.method.lower() not in allowed_methods:
+                        raise AttributeError("Method not allowed", request.method)
+                
                 handler(request, response, **kwargs)
             else:
                 self.default_response(response)
         except Exception as e:
             if self.exception_handler is None:
-                raise e  # Re-raise if no custom handler
+                raise e
             else:
                 self.exception_handler(request, response, e)
         
         return response
+
 
     def test_session(self, base_url="http://127.0.0.1:8082"):
         session = RequestsSession()

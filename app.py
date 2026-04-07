@@ -57,6 +57,32 @@ def books_handler(req, resp):
     resp.text = "All books from Django-style route"
 app.add_route("/django-books", books_handler)
 
+
+# app = API(templates_dir="templates")
+# Use in handlers
+@app.route_create("/template")
+def template_handler(req, resp):
+    resp.body = app.template("index.html", context={
+        "name": "dearmahmud",
+        "title": "Mahmud's Framework"
+    }).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
+
+# @app.route_create("/error") 
+# def buggy_handler(req, resp):
+#     raise ValueError("Something went wrong!")
+# def custom_exception_handler(request, response, exception):
+#     response.text = "Oops! Something went wrong. Please contact support."
+# app.add_exception_handler(custom_exception_handler)
+
+def custom_exception_handler(request, response, exception_cls):
+    response.text = f"Error occurred: {str(exception_cls)}"
+app.add_exception_handler(custom_exception_handler)
+
+@app.route_create("/exception")
+def exception_throwing_handler(request, response):
+    raise AssertionError("This handler should not be used.")
+
+
 # Use Middleware for request/response processing
 class SimpleCustomMiddleware(Middleware):
     def process_request(self, req):
@@ -76,38 +102,25 @@ class RequestTimingMiddleware(Middleware):
             resp.headers['X-Response-Time'] = f"{duration:.4f}s"
 app.add_middleware(RequestTimingMiddleware)
 
-# def custom_exception_handler(request, response, exception):
-#     response.text = "Oops! Something went wrong. Please contact support."
-# app.add_exception_handler(custom_exception_handler)
 
-# @app.route("/error") 
-# def buggy_handler(req, resp):
-#     raise ValueError("Something went wrong!")
-# Result: Friendly error message shown to users
+# Function-based handlers with method control
+@app.route("/api/products", allowed_methods=["GET", "POST"])
+def products_api(request, response):
+    if request.method == "GET":
+        response.text = "List products"
+    elif request.method == "POST":
+        response.text = "Create product"
 
+@app.route("/api/orders", allowed_methods=["GET"])
+def orders_api(request, response):
+    response.text = "List orders"
 
-# Method -2: Use Middleware for request processing and exception handling
-# Initialize with template directory
-"""
-app = API(templates_dir="templates")
+# Django-style route with method control
+def admin_handler(req, resp):
+    resp.text = "Admin panel - PATCH only"
 
-# Use in handlers
-@app.route("/template")
-def template_handler(req, resp):
-    resp.body = app.template("index.html", context={
-        "name": "dearmahmud",
-        "title": "Mahmud's Framework"
-    }).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
+app.add_route("/api/admin", admin_handler, allowed_methods=["PATCH"])
 
-
-def custom_exception_handler(request, response, exception_cls):
-    response.text = f"Error occurred: {str(exception_cls)}"
-app.add_exception_handler(custom_exception_handler)
-
-@app.route("/exception")
-def exception_throwing_handler(request, response):
-    raise AssertionError("This handler should not be used.")
-"""
 
 
 # To run the server, and verify the routes, you can use the following curl commands:
