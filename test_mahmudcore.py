@@ -1,8 +1,8 @@
 
 # Unit Testing 
 import pytest
-from api import API
-from middleware import Middleware
+from MahmudCore.api import API
+from MahmudCore.middleware import Middleware
 
 # from api import API
 
@@ -11,7 +11,7 @@ from middleware import Middleware
 #     return API()
 
 def test_basic_route_adding(api):
-    @api.route_create("/home")  # This overwrites the first handler! -> thats a problem
+    @api.route("/home")  # This overwrites the first handler! -> thats a problem
     def home2(request, response):
         response.text = "Hello from the SECOND HOME page test"
     # assert "/home" in api.routes
@@ -19,12 +19,12 @@ def test_basic_route_adding(api):
 
 
 def test_duplicate_route_throws_exception(api):
-    @api.route_create("/test")
+    @api.route("/test")
     def test(request, response):
         response.text = "Hello from the HOME page test"
 
     with pytest.raises(AssertionError):
-        @api.route_create("/test")  # This should raise an exception because the route already exists
+        @api.route("/test")  # This should raise an exception because the route already exists
         def test(request, response):
             response.text = "Hello from the SECOND HOME page test"
 
@@ -32,7 +32,7 @@ def test_duplicate_route_throws_exception(api):
 def test_client_can_send_requests(api, client):
     RESPONSE_TEXT = "Hello from test client"
 
-    @api.route_create("/test")
+    @api.route("/test")
     def test_handler(request, response):
         response.text = RESPONSE_TEXT
 
@@ -41,7 +41,7 @@ def test_client_can_send_requests(api, client):
 
 
 def test_parameterized_route(api, client):
-    @api.route_create("/hello/{name}")
+    @api.route("/hello/{name}")
     def hello(request, response, name):
         response.text = f"Hello, {name}!"
 
@@ -60,7 +60,7 @@ def test_default_404_response(client):
 
 def test_class_based_handler_get(api, client):
     response_text = "This is a GET request"
-    @api.route_create("/books")
+    @api.route("/books")
     class BookResource:
         def get(self, request, response):
             response.text = response_text
@@ -71,7 +71,7 @@ def test_class_based_handler_get(api, client):
 def test_class_based_handler_post(api, client):
     response_text = "This is a POST request"
 
-    @api.route_create("/books")
+    @api.route("/books")
     class BookResource:
         def post(self, request, response):
             response.text = response_text
@@ -80,7 +80,7 @@ def test_class_based_handler_post(api, client):
     assert response.text == response_text
 
 def test_class_based_handler_not_allowed_method(api, client):
-    @api.route_create("/books")
+    @api.route("/books")
     class BookResource:
         def post(self, request, response):
             response.text = "Only POST allowed."
@@ -317,22 +317,22 @@ def test_empty_response_handling(api, client):
     assert response.text == ""  # Empty body
 
 
-# pytest test_dearmahmud.py
-# pytest test_dearmahmud.py::test_template
-# pytest test_dearmahmud.py::test_assets_are_served
-# pytest test_dearmahmud.py::test_custom_exception_handler
-# pytest test_dearmahmud.py::test_404_is_returned_for_nonexistent_static_file
-# pytest test_dearmahmud.py::test_middleware_methods_are_called
-# pytest test_dearmahmud.py::test_allowed_methods_for_function_based_handlers
-# pytest test_dearmahmud.py::test_default_allowed_methods
-# pytest test_dearmahmud.py::test_add_route_with_allowed_methods
-# pytest test_dearmahmud.py::test_class_based_handlers_still_work
-# pytest test_dearmahmud.py::test_json_response_helper test_dearmahmud.py::test_html_response_helper test_dearmahmud.py::test_text_response_helper
-# pytest test_dearmahmud.py::test_json_response_helper test_dearmahmud.py::test_html_response_helper test_dearmahmud.py::test_text_response_helper test_dearmahmud.py::test_manually_setting_body
+# pytest test_mahmudcore.py
+# pytest test_mahmudcore.py::test_template
+# pytest test_mahmudcore.py::test_assets_are_served
+# pytest test_mahmudcore.py::test_custom_exception_handler
+# pytest test_mahmudcore.py::test_404_is_returned_for_nonexistent_static_file
+# pytest test_mahmudcore.py::test_middleware_methods_are_called
+# pytest test_mahmudcore.py::test_allowed_methods_for_function_based_handlers
+# pytest test_mahmudcore.py::test_default_allowed_methods
+# pytest test_mahmudcore.py::test_add_route_with_allowed_methods
+# pytest test_mahmudcore.py::test_class_based_handlers_still_work
+# pytest test_mahmudcore.py::test_json_response_helper test_mahmudcore.py::test_html_response_helper test_mahmudcore.py::test_text_response_helper
+# pytest test_mahmudcore.py::test_json_response_helper test_mahmudcore.py::test_html_response_helper test_mahmudcore.py::test_text_response_helper test_mahmudcore.py::test_manually_setting_body
 
 
-# pytest --cov=. test_dearmahmud.py
-# pytest --cov=. --cov-report=html test_dearmahmud.py
+# pytest --cov=. test_mahmudcore.py
+# pytest --cov=. --cov-report=html test_mahmudcore.py
 # cd htmlcov -> python3 -m http.server 9000
 
 

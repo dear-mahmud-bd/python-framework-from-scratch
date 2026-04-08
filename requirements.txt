@@ -11,5 +11,10 @@ whitenoise==6.12.0 # for serving static files in production
 
 
 
+# pip install twine wheel setuptools # -> for PyPi
+twine==6.2.0
+wheel==0.46.3
+setuptools==82.0.1
+
 
 # pip install -r requirements.txt
