@@ -240,6 +240,83 @@ def test_class_based_handlers_still_work(api, client):
         client.put("http://127.0.0.1:8082/resource")
 
 
+
+def test_json_response_helper(api, client):
+    @api.route("/json")
+    def json_handler(req, resp):
+        resp.json = {"name": "dearmahmud"}
+
+    response = client.get("http://127.0.0.1:8082/json")
+    json_body = response.json()
+
+    assert response.headers["Content-Type"] == "application/json"
+    assert json_body["name"] == "dearmahmud"
+
+def test_html_response_helper(api, client):
+    @api.route("/html")
+    def html_handler(req, resp):
+        resp.html = api.template(
+            "index.html", 
+            context={"title": "Best Title", "name": "Best Name"}
+        )
+
+    response = client.get("http://127.0.0.1:8082/html")
+
+    assert "text/html" in response.headers["Content-Type"]
+    assert "Best Title" in response.text
+    assert "Best Name" in response.text
+
+def test_text_response_helper(api, client):
+    response_text = "Just Plain Text"
+
+    @api.route("/text")
+    def text_handler(req, resp):
+        resp.text = response_text
+
+    response = client.get("http://127.0.0.1:8082/text")
+
+    assert "text/plain" in response.headers["Content-Type"]
+    assert response.text == response_text
+
+def test_manually_setting_body(api, client):
+    @api.route("/body")
+    def text_handler(req, resp):
+        resp.body = b"Byte Body"
+        resp.content_type = "text/plain"
+
+    response = client.get("http://127.0.0.1:8082/body")
+
+    assert "text/plain" in response.headers["Content-Type"]
+    assert response.text == "Byte Body"
+
+
+# test_poridhiframe.py - Add this test
+
+def test_response_property_priority(api, client):
+    @api.route("/priority")
+    def priority_handler(req, resp):
+        resp.json = {"type": "json"}
+        resp.html = "<h1>HTML</h1>"
+        resp.text = "Plain text"  # Last one wins
+
+    response = client.get("http://127.0.0.1:8082/priority")
+
+    assert "text/plain" in response.headers["Content-Type"]
+    assert response.text == "Plain text" # if multiple response properties are set, the last one processed wins
+
+
+def test_empty_response_handling(api, client):
+    @api.route("/empty")
+    def empty_handler(req, resp):
+        # Don't set any response properties
+        pass
+
+    response = client.get("http://127.0.0.1:8082/empty")
+
+    assert response.status_code == 200
+    assert response.text == ""  # Empty body
+
+
 # pytest test_dearmahmud.py
 # pytest test_dearmahmud.py::test_template
 # pytest test_dearmahmud.py::test_assets_are_served
@@ -250,7 +327,9 @@ def test_class_based_handlers_still_work(api, client):
 # pytest test_dearmahmud.py::test_default_allowed_methods
 # pytest test_dearmahmud.py::test_add_route_with_allowed_methods
 # pytest test_dearmahmud.py::test_class_based_handlers_still_work
-# 
+# pytest test_dearmahmud.py::test_json_response_helper test_dearmahmud.py::test_html_response_helper test_dearmahmud.py::test_text_response_helper
+# pytest test_dearmahmud.py::test_json_response_helper test_dearmahmud.py::test_html_response_helper test_dearmahmud.py::test_text_response_helper test_dearmahmud.py::test_manually_setting_body
+
 
 # pytest --cov=. test_dearmahmud.py
 # pytest --cov=. --cov-report=html test_dearmahmud.py
@@ -270,4 +349,18 @@ Test class-based handlers:
 curl http://localhost:8082/books # Should work - GET implemented
 curl -X POST http://localhost:8082/books # Should work - POST implemented
 curl -X DELETE http://localhost:8082/books # Should fail - DELETE not implemented
+"""
+
+"""
+Test the new response helpers
+curl http://localhost:8082/template # Test clean template rendering
+curl http://localhost:8082/json # Test automatic JSON serialization
+curl http://localhost:8082/text # Test simple text response
+curl http://localhost:8082/api/users # Test API endpoint with complex JSON
+curl http://localhost:8082/books # Test class-based handler JSON response
+
+Verify content-types using curl headers
+curl -i http://localhost:8082/json # Check JSON content-type
+curl -i http://localhost:8082/template # Check HTML content-type  
+curl -i http://localhost:8082/text # Check text content-type
 """

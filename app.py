@@ -34,10 +34,23 @@ def home2(request, response):
 # Django-style class-based views 
 @app.route_create("/books")
 class BooksResource:
-    def get(self, request, response):
-        response.text = "List all books"
-    def post(self, request, response):
-        response.text = "Create a new book"
+    # def get(self, request, response):
+    #     response.text = "List all books"
+    # def post(self, request, response):
+    #     response.text = "Create a new book"
+    def get(self, req, resp):
+        resp.json = {"books": ["Book 1", "Book 2", "Book 3"]}
+    def post(self, req, resp):
+        resp.json = {"message": "Book created successfully"}
+
+# Add this API endpoint to show complex JSON responses
+@app.route("/api/users")
+def users_api(req, resp):
+    users = [
+        {"id": 1, "name": "Alice", "email": "alice@example.com"},
+        {"id": 2, "name": "Bob",   "email": "bob@example.com"}
+    ]
+    resp.json = {"users": users, "total": len(users)}
 
 @app.route_create("/users/{id:d}")
 class UserResource:
@@ -59,13 +72,17 @@ app.add_route("/django-books", books_handler)
 
 
 # app = API(templates_dir="templates")
-# Use in handlers
-@app.route_create("/template")
-def template_handler(req, resp):
-    resp.body = app.template("index.html", context={
-        "name": "dearmahmud",
-        "title": "Mahmud's Framework"
-    }).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
+
+# # Use in handlers
+# @app.route_create("/template")
+# def template_handler(req, resp):
+#     resp.body = app.template(
+#         "index.html", 
+#         context={
+#             "name": "dearmahmud",
+#             "title": "Mahmud's Framework"
+#         }
+#     ).encode() # if use resp.text = .encode() is not needed, but if use resp.body = .encode() is needed to convert string to bytes
 
 # @app.route_create("/error") 
 # def buggy_handler(req, resp):
@@ -121,6 +138,27 @@ def admin_handler(req, resp):
 
 app.add_route("/api/admin", admin_handler, allowed_methods=["PATCH"])
 
+
+@app.route("/template")
+def template_handler(req, resp):
+    resp.html = app.template(
+        "index.html", 
+        context={
+            "name": "dearmahmud", 
+            "title": "Mahmud's Framework"
+        }
+    )
+
+@app.route("/json")
+def json_handler(req, resp):
+    resp.json = {
+        "name": "data", 
+        "type": "JSON"
+    }
+
+@app.route("/text")
+def text_handler(req, resp):
+    resp.text = "This is a simple text"
 
 
 # To run the server, and verify the routes, you can use the following curl commands:
