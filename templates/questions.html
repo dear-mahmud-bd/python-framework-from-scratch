@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="static/css/main.css" type="text/css" rel="stylesheet" />
+    <title>Question Board</title>
+  </head>
+  <body>
+    <div class="container">
+      <header class="hero">
+        <h1>💬 Question Board</h1>
+        <p>Ask, explore, and manage simple programming questions.</p>
+      </header>
+
+      <div id="login-form-wrapper" class="card">
+        <h2>Login</h2>
+        <form id="login-form" method="post" class="form-grid">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" required />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required />
+          </div>
+
+          <button id="login-button">Log in</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <h2>All Questions</h2>
+          <span class="badge">{{ questions|length }} Questions</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Content</th>
+                <th>Author</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for question in questions %}
+              <tr>
+                <td>#{{ question.id }}</td>
+                <td class="title-cell">{{ question.title }}</td>
+                <td>{{ question.content }}</td>
+                <td>{{ question.author }}</td>
+                <td>
+                  <button
+                    data-id="{{ question.id }}"
+                    class="delete-button"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Create New Question</h2>
+        <form id="create-form" method="post" class="form-grid">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" required />
+          </div>
+
+          <div class="form-group">
+            <label for="author">Author</label>
+            <input type="text" name="author" id="author" required />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="content">Content</label>
+            <textarea name="content" id="content" rows="5" required></textarea>
+          </div>
+
+          <button id="create-button">Create Question</button>
+        </form>
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+    <script src="static/js/app.js"></script>
+  </body>
+</html>

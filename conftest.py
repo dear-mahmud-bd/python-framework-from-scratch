@@ -1,6 +1,9 @@
 
 import pytest
-from MahmudCore.api import API
+
+from api import API
+
+# from MahmudCore.api import API
 
 @pytest.fixture
 def api():

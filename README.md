@@ -571,7 +571,7 @@ Building MahmudCore from scratch across open-secrete labs😉 taught me how ever
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+<!-- MIT License - see [LICENSE](LICENSE) for details. -->
 
 ---
 
